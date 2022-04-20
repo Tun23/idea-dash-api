@@ -15,17 +15,20 @@ export class AuthService extends BaseService<UserEntity> {
     const { email, password } = dto;
     let user: UserEntity;
     if (email === 'admin') {
-      user = await this.repo.findOne({
-        where: { role: ERole.root, delete_flag: 0 },
-        order: {
-          id: 'ASC',
-        },
-      });
+      user = await this.repo
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.image', 'avatar')
+        .where('user.role = :role', { role: ERole.root })
+        .andWhere('user.delete_flag = :deleteFlag', { deleteFlag: 0 })
+        .getOne();
     } else {
-      user = await this.repo.findOne({
-        where: { email, delete_flag: 0 },
-        relations: ['department'],
-      });
+      user = await this.repo
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.image', 'avatar')
+        .leftJoinAndSelect('user.department', 'department')
+        .where('user.email = :email', { email })
+        .andWhere('user.delete_flag = :deleteFlag', { deleteFlag: 0 })
+        .getOne();
     }
 
     if (!user || (await user.comparePassword(password))) {
