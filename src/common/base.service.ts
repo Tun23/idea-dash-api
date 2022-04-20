@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
-import { DeepPartial, Connection, getConnection, Repository } from 'typeorm';
+import { DeepPartial, Connection, getConnection, Repository, Like } from 'typeorm';
 @Injectable()
 export class BaseService<T> {
   protected connection: Connection;
@@ -32,5 +32,35 @@ export class BaseService<T> {
     } catch (e) {
       throw new HttpException(e, HttpStatus.BAD_REQUEST);
     }
+  }
+  async search(query: any): Promise<any> {
+    try {
+      const limit = Number(query.limit) || 10;
+      const page = Number(query.page) || 1;
+      const qb = this.repo
+        .createQueryBuilder()
+        .where({ delete_flag: 0 })
+        .skip(limit * (page - 1))
+        .take(limit)
+        .orderBy({ id: 'ASC' });
+      if (query.keyword) qb.andWhere({ name: Like(`%${query.keyword}%`) });
+      const data = await qb.getManyAndCount();
+      return this.paginateResponse(data, page, limit);
+    } catch (e) {}
+  }
+  protected paginateResponse(result: any, page: number, limit: number) {
+    const [data, total] = result;
+    const lastPage = Math.ceil(total / limit);
+    const nextPage = page + 1 > lastPage ? null : page + 1;
+    const prevPage = page - 1 < 1 ? null : page - 1;
+    return {
+      limit,
+      page,
+      total,
+      prevPage,
+      nextPage,
+      lastPage,
+      data,
+    };
   }
 }
