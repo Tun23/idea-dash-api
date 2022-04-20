@@ -1,0 +1,17 @@
+{
+  "type": "mysql",
+  "host": "base.cbdzkkapxwzl.ap-southeast-1.rds.amazonaws.com",
+  "port": 3306,
+  "username": "admin",
+  "password": "YAX5CCuxlJpPgMZH",
+  "database": "base",
+  "entities": ["src/**/*.entity{.ts,.js}"],
+  "migrationsRun": true,
+  "migrationsTableName": "migrations",
+  "migrations": ["src/**/*.migration{.ts,.js}"],
+  "cli": { "migrationsDir": "src/migrations" },
+  "keepConnectionAlive": false,
+  "logging": true,
+  "synchronize": false,
+  "timezone": "UTC"
+}
