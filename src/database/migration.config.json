@@ -6,7 +6,7 @@
   "password": "YAX5CCuxlJpPgMZH",
   "database": "base",
   "entities": ["src/**/*.entity{.ts,.js}"],
-  "migrationsRun": true,
+  "migrationsRun": false,
   "migrationsTableName": "migrations",
   "migrations": ["src/**/*.migration{.ts,.js}"],
   "cli": { "migrationsDir": "src/migrations" },
