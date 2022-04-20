@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
   Index,
   ManyToOne,
   JoinColumn,
@@ -36,6 +37,18 @@ export class IdeaEntity {
   @IsInt()
   @Column('int', { name: 'category_id', nullable: false })
   category_id: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  @Column('int', { name: 'image_id', nullable: true })
+  image_id: number | null;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  @Column('int', { name: 'document_id', nullable: true })
+  document_id: number | null;
 
   @IsOptional()
   @IsString()
@@ -105,6 +118,11 @@ export class IdeaEntity {
   @OneToMany((type) => CommentEntity, (comment) => comment.idea)
   comments: CommentEntity[];
 
-  @OneToMany((type) => FileEntity, (file) => file.idea)
-  files: FileEntity[];
+  @OneToOne(() => FileEntity, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'image_id' })
+  image: FileEntity;
+
+  @OneToOne(() => FileEntity, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'document_id' })
+  document: FileEntity;
 }
