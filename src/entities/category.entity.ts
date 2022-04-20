@@ -1,8 +1,20 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, OneToMany, Index, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  OneToMany,
+  OneToOne,
+  Index,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength, IsOptional, IsEmpty, IsInt, IsDateString } from 'class-validator';
 import { UserEntity } from './user.entity';
 import { IdeaEntity } from './idea.entity';
+import { FileEntity } from './file.entity';
 
 @Entity('categories')
 @Index(['id'], { unique: true })
@@ -16,6 +28,12 @@ export class CategoryEntity {
   @IsInt()
   @Column('int', { name: 'creator_id', nullable: false })
   creator_id: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsInt()
+  @Column('int', { name: 'image_id', nullable: true })
+  image_id: number | null;
 
   @IsOptional()
   @IsString()
@@ -49,6 +67,10 @@ export class CategoryEntity {
 
   @Column('tinyint', { name: 'delete_flag', width: 1, default: 0 })
   delete_flag: number;
+
+  @OneToOne(() => FileEntity, { onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'image_id' })
+  image: FileEntity;
 
   @ManyToOne((type) => UserEntity, {
     cascade: true,

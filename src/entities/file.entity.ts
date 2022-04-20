@@ -14,6 +14,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, MaxLength, IsOptional, IsEmpty, IsInt } from 'class-validator';
 import { UserEntity } from './user.entity';
 import { IdeaEntity } from './idea.entity';
+import { CategoryEntity } from './category.entity';
 
 @Entity('files')
 @Index(['id'], { unique: true })
@@ -52,6 +53,9 @@ export class FileEntity {
 
   @OneToOne(() => UserEntity, (item) => item.image, { cascade: true, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   user_image: UserEntity;
+
+  @OneToOne(() => CategoryEntity, (item) => item.image, { cascade: true, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+  category_image: CategoryEntity;
 
   @OneToOne(() => IdeaEntity, (idea) => idea.image, { cascade: true, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
   idea_image: IdeaEntity;

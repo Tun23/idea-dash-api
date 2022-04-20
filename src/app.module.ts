@@ -4,6 +4,7 @@ import { MigrationModule } from './modules/common/migration/migration.module';
 import { AuthModule } from './modules/v1/auth/auth.module';
 import { UserModule } from './modules/v1/user/user.module';
 import { DepartmentModule } from './modules/v1/department/department.module';
+import { CategoryModule } from './modules/v1/category/category.module';
 import { FiledModule } from './modules/v1/file/file.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,14 +12,7 @@ import { HttpExceptionFilter } from './shared/http-exception.filter';
 import { APP_FILTER } from '@nestjs/core';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    MigrationModule,
-    AuthModule,
-    UserModule,
-    DepartmentModule,
-    FiledModule,
-  ],
+  imports: [DatabaseModule, MigrationModule, AuthModule, UserModule, DepartmentModule, FiledModule, CategoryModule],
   controllers: [AppController],
   providers: [
     AppService,
