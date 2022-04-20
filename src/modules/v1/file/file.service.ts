@@ -28,8 +28,7 @@ export class FileService extends BaseService<FileEntity> {
         entity.creator = user;
         delete entity.creator_id;
       }
-      await this.repo.save(entity);
-      return { message: 'Upload successfully' };
+      return await this.repo.save(entity);
     } catch (e) {
       throw new HttpException(e, HttpStatus.BAD_REQUEST);
     }

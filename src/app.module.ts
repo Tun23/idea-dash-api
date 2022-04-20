@@ -11,7 +11,14 @@ import { HttpExceptionFilter } from './shared/http-exception.filter';
 import { APP_FILTER } from '@nestjs/core';
 
 @Module({
-  imports: [DatabaseModule, MigrationModule, AuthModule, UserModule, DepartmentModule, FiledModule],
+  imports: [
+    DatabaseModule,
+    MigrationModule,
+    AuthModule,
+    UserModule,
+    DepartmentModule,
+    FiledModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
