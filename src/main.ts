@@ -17,6 +17,6 @@ async function bootstrap() {
     description: 'Nestjs + Nuxtjs + Mysql + Swagger',
     endpoint: '/docs',
   });
-  await app.listen(process.env.NEST_PORT || 5000);
+  await app.listen(process.env.PORT || 5000);
 }
 bootstrap();

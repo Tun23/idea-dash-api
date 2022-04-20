@@ -35,6 +35,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
           delete data.message;
         }
         return {
+          success: true,
           code: status,
           message,
           data,
