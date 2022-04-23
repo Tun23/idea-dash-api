@@ -8,7 +8,7 @@ import { ApiTags, ApiConsumes } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CategoryCreateDTO, CategoryUpdateDTO, CategoryListDTO } from './dto/category.dto';
 
-@Controller('api/v1/topic')
+@Controller('api/v1/category')
 @ApiTags('Category')
 @UseGuards(AuthGuard, RolesGuard)
 export class CategoryController {

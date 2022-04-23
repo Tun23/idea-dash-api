@@ -1,9 +1,9 @@
 {
   "type": "mysql",
-  "host": "base.cbdzkkapxwzl.ap-southeast-1.rds.amazonaws.com",
+  "host": "",
   "port": 3306,
   "username": "admin",
-  "password": "YAX5CCuxlJpPgMZH",
+  "password": "",
   "database": "base",
   "entities": ["src/**/*.entity{.ts,.js}"],
   "migrationsRun": false,
