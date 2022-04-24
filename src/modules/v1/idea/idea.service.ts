@@ -25,16 +25,18 @@ export class IdeaService extends BaseService<IdeaEntity> {
     let data = await this.repo
       .createQueryBuilder('idea')
       .leftJoinAndSelect('idea.author', 'author', 'author.delete_flag = :deleteFlag')
+      .leftJoinAndSelect('author.image', 'authorImage', 'authorImage.delete_flag = :deleteFlag')
       .leftJoinAndSelect('idea.image', 'image', 'image.delete_flag = :deleteFlag')
       .leftJoinAndSelect('idea.document', 'document', 'document.delete_flag = :deleteFlag')
       .leftJoinAndSelect('idea.comments', 'comment', 'comment.delete_flag = :deleteFlag')
-      .leftJoinAndSelect('comment.creator', 'creator', 'creator.delete_flag = :deleteFlag', { deleteFlag: 0 })
+      .leftJoinAndSelect('comment.creator', 'creator', 'creator.delete_flag = :deleteFlag')
+      .leftJoinAndSelect('creator.image', 'commentImage', 'commentImage.delete_flag = :deleteFlag', { deleteFlag: 0 })
       .leftJoinAndSelect('idea.upVotes', 'upVotes')
       .leftJoinAndSelect('idea.downVotes', 'downVotes')
-      .leftJoinAndSelect('idea.comments', 'comments')
       .where('idea.id = :id', { id })
       .andWhere('idea.delete_flag = :deleteFlag', { deleteFlag: 0 })
       .getOne();
+      console.log(data)
     if (data) {
       data = this.toResponseObject(data);
     }
