@@ -9,6 +9,7 @@ import { IdeaModule } from './modules/v1/idea/idea.module';
 import { FiledModule } from './modules/v1/file/file.module';
 import { CommentModule } from './modules/v1/comment/comment.module';
 import { MailModule } from './mailer/mail.module';
+import { ReportModule } from './modules/v1/report/report.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpExceptionFilter } from './shared/http-exception.filter';
@@ -26,6 +27,7 @@ import { APP_FILTER } from '@nestjs/core';
     FiledModule,
     CommentModule,
     MailModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [
