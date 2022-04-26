@@ -2,7 +2,7 @@ import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import { FileEntity } from 'src/entities/file.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { BaseService } from 'src/common/base.service';
 import { UploadService } from 'src/common/upload.service';
@@ -32,5 +32,16 @@ export class FileService extends BaseService<FileEntity> {
     } catch (e) {
       throw new HttpException(e, HttpStatus.BAD_REQUEST);
     }
+  }
+  async downloadFiles(ids: number[]) {
+    const files = await this.repo
+      .createQueryBuilder()
+      .where({ id: In(ids), delete_flag: 0 })
+      .orderBy(`FIND_IN_SET(id, '${ids.join(',')}')`)
+      .getMany();
+    const filePaths = files.map((file) => {
+      return file.source_url.replace(`${process.env.AWS_S3_ENDPOINT}/`, '');
+    });
+    return await this.uploadSrv.multipleFileDownload(filePaths);
   }
 }

@@ -27,6 +27,10 @@ export class UploadService {
     Bucket: this.AWS_S3_BUCKET_NAME,
     Key: '',
   };
+  private downloadParams = {
+    Bucket: this.AWS_S3_BUCKET_NAME,
+    Key: '',
+  };
 
   async fileUpload(@UploadedFile() file) {
     const prefix = 'files';
@@ -57,5 +61,29 @@ export class UploadService {
         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     });
+  }
+
+  async fileDownload(filePath) {
+    const params = this.downloadParams;
+    params.Key = filePath;
+    if (isEmpty(filePath)) {
+      throw new NotFoundException();
+    }
+    try {
+      return await this.s3.getObject(params).promise();
+    } catch (err) {
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  async multipleFileDownload(filePaths: Array<string>) {
+    try {
+      const promises = filePaths.map((filePath) => {
+        return this.fileDownload(filePath);
+      });
+      return await Promise.all(promises);
+    } catch (err) {
+      if (err instanceof HttpException) throw err;
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Res, UseGuards, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AuthGuard } from 'src/modules/v1/auth/guard/auth.guard';
 import { RolesGuard } from 'src/modules/v1/auth/guard/role.guard';
@@ -16,6 +16,10 @@ export class CategoryController {
   @Get()
   async getMany() {
     return await this.service.getMany();
+  }
+  @Get('/:id/download')
+  async download(@Param('id') id: number, @Res() res: any) {
+    return await this.service.download(id, res);
   }
   @Get('/search')
   async search(@Query() query: CategoryListDTO) {
