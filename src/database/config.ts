@@ -7,7 +7,7 @@ export const TypeOrmConfig: any = {
   database: process.env.DB_DATABASE,
   keepConnectionAlive: true,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrationsRun: true,
+  migrationsRun: false,
   migrationsTableName: 'migrations',
   migrations: [__dirname + '/../**/*.migration{.ts,.js}'],
   timezone: 'UTC',
