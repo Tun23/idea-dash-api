@@ -47,12 +47,13 @@ export class CommentService extends BaseService<CommentEntity> {
           context: {
             author: idea.author.user_name,
             comment: entity.comment,
-            commentAuthor: entity.creator.user_name,
+            commentAuthor: entity.is_incognito ? 'Somebody' : entity.creator.user_name,
           },
         });
         entity.idea = idea;
         delete entity.idea_id;
       }
+      console.log(entity);
       return await this.repo.save(entity);
     } catch (e) {
       if (e instanceof HttpException) throw e;
