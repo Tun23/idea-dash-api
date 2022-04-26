@@ -36,9 +36,11 @@ export class IdeaService extends BaseService<IdeaEntity> {
       .where('idea.id = :id', { id })
       .andWhere('idea.delete_flag = :deleteFlag', { deleteFlag: 0 })
       .getOne();
-      console.log(data)
     if (data) {
       data = this.toResponseObject(data);
+      const entity = await this.repo.findOne({ where: { id, delete_flag: 0 } });
+      entity.total_view = entity.total_view + 1;
+      await this.repo.save(entity);
     }
     return data;
   }
