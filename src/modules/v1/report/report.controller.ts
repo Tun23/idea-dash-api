@@ -16,9 +16,9 @@ export class ReportController {
   async overView() {
     return await this.service.overView();
   }
-  @Get('/top-view')
+  @Get('/top')
   @Role(ERole.admin, ERole.root)
-  async topView() {
-    return await this.service.topView();
+  async topByIdea() {
+    return await this.service.topByIdea();
   }
 }

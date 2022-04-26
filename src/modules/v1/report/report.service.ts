@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { BaseService } from 'src/common/base.service';
-import { groupBy } from 'lodash';
+import { groupBy, orderBy } from 'lodash';
 import * as moment from 'moment';
 
 @Injectable()
@@ -57,20 +57,30 @@ export class ReportService extends BaseService<CategoryEntity> {
       throw new InternalServerErrorException(e);
     }
   }
-  async topView(): Promise<any> {
+  async topByIdea(): Promise<any> {
     try {
-      const data = await this.connection
+      const topView = await this.connection
         .getRepository(IdeaEntity)
         .createQueryBuilder('idea')
-        .leftJoinAndSelect('idea.category', 'category')
-        .leftJoinAndSelect('idea.author', 'author', 'author.delete_flag = :deleteFlag')
-        .leftJoinAndSelect('author.department', 'department', 'department.delete_flag = :deleteFlag')
         .where('idea.delete_flag = :deleteFlag', { deleteFlag: 0 })
         .orderBy('idea.total_view', 'DESC')
         .take(10)
         .getMany();
-
-      return data;
+      const rawData = await this.connection
+        .getRepository(IdeaEntity)
+        .createQueryBuilder('idea')
+        .leftJoinAndSelect('idea.upVotes', 'upVotes')
+        .leftJoinAndSelect('idea.downVotes', 'downVotes')
+        .where('idea.delete_flag = :deleteFlag', { deleteFlag: 0 })
+        .getMany();
+      const rawPopular = rawData.map((item) => {
+        const dt = { ...item, score: 0 };
+        const score = item.upVotes.length - item.downVotes.length;
+        dt.score = score <= 0 ? 0 : score;
+        return dt
+      });
+      const topPopular = orderBy(rawPopular, ['score'], ['desc']).slice(0, 10);
+      return { topView, topPopular };
     } catch (e) {
       throw new InternalServerErrorException(e);
     }
