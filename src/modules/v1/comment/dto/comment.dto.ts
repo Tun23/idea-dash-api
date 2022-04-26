@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsOptional, IsNumberString } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CommentCreateDTO {
@@ -11,6 +12,11 @@ export class CommentCreateDTO {
   @ApiProperty({ required: true })
   @IsString()
   comment: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @ApiProperty({ required: false })
+  is_incognito: number;
 }
 
 export class CommentListDTO {

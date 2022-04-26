@@ -42,6 +42,12 @@ export class CommentEntity {
   @Column('text', { name: 'comment', nullable: true })
   comment: string | null;
 
+  @IsOptional()
+  @IsInt()
+  @ApiProperty()
+  @Column('tinyint', { name: 'is_incognito', width: 1, default: 0 })
+  is_incognito: number;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', nullable: true })
   created_at: Date;
 
