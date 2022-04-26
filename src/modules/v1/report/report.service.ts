@@ -57,4 +57,22 @@ export class ReportService extends BaseService<CategoryEntity> {
       throw new InternalServerErrorException(e);
     }
   }
+  async topView(): Promise<any> {
+    try {
+      const data = await this.connection
+        .getRepository(IdeaEntity)
+        .createQueryBuilder('idea')
+        .leftJoinAndSelect('idea.category', 'category')
+        .leftJoinAndSelect('idea.author', 'author', 'author.delete_flag = :deleteFlag')
+        .leftJoinAndSelect('author.department', 'department', 'department.delete_flag = :deleteFlag')
+        .where('idea.delete_flag = :deleteFlag', { deleteFlag: 0 })
+        .orderBy('idea.total_view', 'DESC')
+        .take(10)
+        .getMany();
+
+      return data;
+    } catch (e) {
+      throw new InternalServerErrorException(e);
+    }
+  }
 }
