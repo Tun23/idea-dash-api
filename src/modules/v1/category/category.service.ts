@@ -1,13 +1,4 @@
-import {
-  Injectable,
-  Inject,
-  HttpException,
-  HttpStatus,
-  Scope,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, Inject, HttpException, HttpStatus, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +8,10 @@ import { BaseService } from 'src/common/base.service';
 import { plainToClass, plainToClassFromExist } from 'class-transformer';
 import { CategoryCreateDTO, CategoryUpdateDTO, CategoryListDTO } from './dto/category.dto';
 import { FileService } from 'src/modules/v1/file/file.service';
+import { ExportService } from 'src/common/export.service';
+import * as JSZip from 'jszip';
+import { get } from 'lodash';
+import { ECsvHeader } from 'src/enum/csvHeader.enum';
 
 @Injectable()
 export class CategoryService extends BaseService<CategoryEntity> {
@@ -24,6 +19,7 @@ export class CategoryService extends BaseService<CategoryEntity> {
     @InjectRepository(CategoryEntity) repo: Repository<CategoryEntity>,
     @Inject(REQUEST) protected readonly request,
     private readonly fileService: FileService,
+    private readonly exportSrv: ExportService,
   ) {
     super(repo, request);
   }
@@ -132,6 +128,77 @@ export class CategoryService extends BaseService<CategoryEntity> {
       });
       await this.repo.save(exist);
       return { message: 'Deleted successfully.' };
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.BAD_REQUEST);
+    }
+  }
+  async download(id: number, res): Promise<any> {
+    try {
+      const category = await this.repo
+        .createQueryBuilder('category')
+        .leftJoinAndSelect('category.ideas', 'ideas', 'ideas.delete_flag = :deleteFlag')
+        .leftJoinAndSelect('ideas.author', 'author', 'author.delete_flag = :deleteFlag')
+        .leftJoinAndSelect('ideas.image', 'image', 'image.delete_flag = :deleteFlag')
+        .leftJoinAndSelect('ideas.document', 'document', 'document.delete_flag = :deleteFlag')
+        .leftJoinAndSelect('ideas.comments', 'comment', 'comment.delete_flag = :deleteFlag')
+        .leftJoinAndSelect('comment.creator', 'creator', 'creator.delete_flag = :deleteFlag', { deleteFlag: 0 })
+        .leftJoinAndSelect('ideas.upVotes', 'upVotes')
+        .leftJoinAndSelect('ideas.downVotes', 'downVotes')
+        .where('category.id = :id', { id })
+        .andWhere('category.delete_flag = :deleteFlag', { deleteFlag: 0 })
+        .getOne();
+      if (!category) {
+        throw new NotFoundException();
+      }
+      const fileIds = category.ideas.map((idea) => {
+        const files = [];
+        const names = [];
+        if (idea.image_id) {
+          files.push(idea.image_id);
+          names.push(idea.image?.source_url);
+        }
+        if (idea.document_id) {
+          files.push(idea.document_id);
+          names.push(idea.document?.source_url);
+        }
+        return { id: idea.title || idea.id, files, names };
+      });
+      const zip = new JSZip();
+      const promises = fileIds.map(async (item) => {
+        const files = await this.fileService.downloadFiles(item.files);
+        const folder = zip.folder(item.id.toString());
+        item.names.forEach((value, index) => {
+          folder.file(value.replace(`${process.env.AWS_S3_ENDPOINT}/files/`, ''), files[index].Body as any, { base64: true });
+        });
+      });
+      const data = category.ideas.map((idea) => {
+        const row = {
+          id: idea.id,
+          title: idea.title,
+          description: idea.description,
+          isIncognito: idea.is_incognito,
+          author: get(idea, 'author.user_name', ''),
+          category: category.name,
+          totalView: idea.total_view,
+          upVoteCount: idea.upVotes.length || 0,
+          downVoteCount: idea.downVotes.length || 0,
+          comment: idea.comments.length || 0,
+          created_at: idea.created_at,
+          updated_at: idea.updated_at,
+        };
+        return row;
+      });
+
+      await Promise.all(promises);
+      const fileCsvName = `category_${category.id}_${Date.now()}.csv`;
+      const header = Object.values(ECsvHeader);
+      const csv = await this.exportSrv.handle(header, data);
+      zip.file(fileCsvName, csv);
+      const zipData = await zip.generateAsync({ type: 'nodebuffer' });
+      const filename = `category_${category.id}_${Date.now()}.zip`;
+      res.setHeader(`Content-disposition`, `attachment; filename=${filename}`);
+      res.set('Content-Type', 'application/zip');
+      res.status(200).send(zipData);
     } catch (e) {
       throw new HttpException(e, HttpStatus.BAD_REQUEST);
     }
